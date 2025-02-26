@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Take control over macOS files timestamps."
 readme = "README.md"
 authors = [{ name = "Arseny Boykov", email = "hi@bobronium.me" }, { name = "Claude.ai" }]
-requires-python = ">=3.12"
+requires-python = ">=3.9"
 dependencies = []
 
 [project.urls]
