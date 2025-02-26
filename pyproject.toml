@@ -1,0 +1,46 @@
+[project]
+name = "mactime"
+version = "0.1.0"
+description = "Take control over macOS files timestamps."
+readme = "README.md"
+authors = [{ name = "Arseny Boykov", email = "hi@bobronium.me" }, { name = "Claude.ai" }]
+requires-python = ">=3.12"
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/Bobronium/mactime"
+Repository = "https://github.com/Bobronium/mactime.git"
+Issues = "https://github.com/Bobronium/mactime/issues"
+
+[project.optional-dependencies]
+dev = [
+    "mactime[lint,test,typecheck,profile]",
+]
+test = [
+    "pytest>=8.3.4",
+    "pytest-cov>=6.0.0",
+]
+lint = [
+    "ruff>=0.9.7",
+]
+typecheck = [
+    "mypy>=1.15.0",
+    "pyright>=1.1.394",
+]
+profile = [
+    "pyinstrument>=5.0.1",
+]
+
+
+[tool.uv.sources]
+mactime = { workspace = true }
+
+
+[project.scripts]
+mactime = "mactime.cli:main"
+whenwhat = "mactime.cli:main"
+ww = "mactime.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
