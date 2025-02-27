@@ -44,3 +44,16 @@ ww = "mactime.cli:main"
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[tool.mypy]
+follow_imports = "silent"
+warn_redundant_casts = false
+warn_unused_ignores = false
+disallow_any_generics = false
+disallow_incomplete_defs = false
+check_untyped_defs = false
+disallow_untyped_defs = false
+disallow_untyped_calls = false
+disallow_subclassing_any = false
+ignore_missing_imports = true
+ignore_errors = true

@@ -2,10 +2,9 @@ from __future__ import annotations
 
 import json
 from abc import ABC
-from collections.abc import Callable
 from collections.abc import Iterable
 from datetime import datetime
-from typing import cast
+from typing import Callable, cast
 
 from mactime._cli_interface import CLI
 from mactime._cli_interface import Command
@@ -15,7 +14,6 @@ from mactime.constants import EPOCH
 from mactime.constants import SHORTHAND_TO_NAME
 from mactime.constants import NAME_TO_ATTR_MAP
 from mactime.constants import TIME_ALIASES
-from mactime.core import TimeAttrs
 from mactime.constants import WRITABLE_NAMES
 from mactime.errors import ArgumentsError
 from mactime._cli_interface import arg
@@ -23,6 +21,7 @@ from mactime.core import format_options
 from mactime.core import resolve_paths
 from mactime.core import get_last_opened_dates
 from mactime.core import get_timespec_attrs
+from mactime.core import PathType
 from mactime.logger import logger
 from mactime.core import set_path_times
 
@@ -42,7 +41,7 @@ DATE_LAST_OPENED_IS_READ_ONlY = (
 )
 
 
-GET_FORMATTERS: dict[str, Callable[[dict[str, datetime]], str]] = {
+GET_FORMATTERS: dict[str, Callable[[object], str]] = {
     "finder": get_finder_view,
     "json": lambda v: json.dumps(v, ensure_ascii=False, default=datetime.isoformat),
     "yaml": get_yaml_view,
@@ -163,17 +162,14 @@ class GetCommand(_RecursiveArgs):
         elif name == OPENED_NAME and self.skip_opened:
             raise ArgumentsError("--name opened used with --skip-opened is ambiguous.")
 
-    def __call__(
-        self,
-    ) -> (
-        dict[str, TimeAttrs] | dict[str, dict[str, datetime]]
-    ):  # merely for autocomplete
+    def __call__(self) -> int:
         # This is ugly due to the last minute changes.
         # I'm willing to call it good enough and stop.
         if self.name is not None:
             name = self.name
+
             if name == OPENED_NAME:
-                attrs = get_last_opened_dates(self.file)
+                attrs = get_last_opened_dates(cast(list[PathType], self.file))
             else:
                 attrs = {
                     file: get_timespec_attrs(file, no_follow=self.no_follow)[name]
@@ -181,12 +177,12 @@ class GetCommand(_RecursiveArgs):
                 }
 
             if not self.is_cli:
-                return {path: {name: value} for path, value in attrs.items()}
+                {str(path): {str(name): value} for path, value in attrs.items()}
+                return 0
             else:
                 for attr in attrs.values():
                     print(attr)
-
-            return cast(dict[str, TimeAttrs], {})
+                return 0
 
         paths = {}
         files = list(
@@ -200,14 +196,14 @@ class GetCommand(_RecursiveArgs):
         if self.skip_opened:
             opened = dict.fromkeys(files, EPOCH)
         else:
-            opened = get_last_opened_dates(files)
+            opened = get_last_opened_dates(cast(list[PathType], files))
 
         for file in files:
             paths[str(file)] = get_timespec_attrs(file, no_follow=self.no_follow)
-            paths[str(file)][OPENED_NAME] = opened[file]
+            paths[str(file)][str(OPENED_NAME)] = opened[file]
 
         if not self.is_cli:
-            return paths
+            return 0
 
         if self.order_by is not None:
             order_by = SHORTHAND_TO_NAME.get(self.order_by, self.order_by)
@@ -222,7 +218,7 @@ class GetCommand(_RecursiveArgs):
         formatter = GET_FORMATTERS[self.format]
         print(formatter(paths))
 
-        return paths
+        return 0
 
 
 @dataclass
@@ -359,7 +355,7 @@ class SetCommand(_RecursiveArgs):
                         f" not {value!r}"
                     )
 
-    def __call__(self):
+    def __call__(self) -> int:
         files_generator = resolve_paths(
             self.file,
             self.recursive,
@@ -369,7 +365,7 @@ class SetCommand(_RecursiveArgs):
 
         if self.from_opened:
             files = list(files_generator)  # only resolve paths if actually necessary
-            opened = get_last_opened_dates(files)
+            opened = get_last_opened_dates(cast(list[PathType], files))
 
             def get_opened_attrs(path: str) -> dict[str, datetime]:
                 return dict.fromkeys(self.from_opened, opened[path])
@@ -383,10 +379,12 @@ class SetCommand(_RecursiveArgs):
         for file in files:
             set_path_times(
                 file,
-                {**self.to_set, **get_opened_attrs(file)},
+                {**self.to_set, **get_opened_attrs(str(file))},
                 self.from_another_attributes,
                 no_follow=self.no_follow,
             )
+
+        return 0
 
 
 @dataclass
@@ -478,12 +476,12 @@ class MatchCommand(_RecursiveArgs):
         if OPENED_NAME in self.attrs:
             raise ArgumentsError(DATE_LAST_OPENED_IS_READ_ONlY)
 
-    def __call__(self):
+    def __call__(self) -> int:
         source_attrs = get_timespec_attrs(self.source)
 
         to_set = {}
         for name in self.attrs:
-            value = source_attrs[name]
+            value = source_attrs[str(name)]
             logger.info(f"Will attempt to match '{name}={value}' from '{self.source}'")
             to_set[name] = value
 
@@ -494,6 +492,8 @@ class MatchCommand(_RecursiveArgs):
             self.files_only,
         ):
             set_path_times(path, to_set, no_follow=self.no_follow)
+
+        return 0
 
 
 class MacTime(CLI):

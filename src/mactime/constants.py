@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-import os
 from datetime import datetime
 from datetime import timedelta
 from decimal import Decimal
-from typing import Final
+from os import PathLike
+from typing import Final, Union, Any
 
 
 MODIFIED_NAME: Final[str] = "modified"
@@ -15,7 +15,7 @@ ACCESSED_NAME: Final[str] = "accessed"
 BACKED_UP_NAME: Final[str] = "backed_up"
 OPENED_NAME: Final[str] = "opened"
 
-PathType = "str | os.PathLike"
+PathType = Union[str, PathLike[Any]]
 
 NANOSECONDS_IN_SECOND = Decimal("1e9")
 

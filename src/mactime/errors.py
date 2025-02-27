@@ -1,8 +1,11 @@
 from __future__ import annotations
 
+from os import PathLike
+from typing import Any, Union
+
+
 import ctypes
 import errno
-import os
 from typing import Type, ClassVar
 
 
@@ -30,7 +33,7 @@ class FSOperationError(MacTimeError, OSError):
 
     def __init__(
         self,
-        path: str,
+        path: Union[str, PathLike[Any]],
         operation: str,
         errno: int,
         message: str | None = None,
@@ -47,7 +50,9 @@ class FSOperationError(MacTimeError, OSError):
             FSOperationError._registry[code] = cls
 
     @classmethod
-    def check_call(cls, ret: int, path: str | os.PathLike, operation: str) -> None:
+    def check_call(
+        cls, ret: int, path: Union[str, PathLike[Any]], operation: str
+    ) -> None:
         if ret == 0:
             return
 

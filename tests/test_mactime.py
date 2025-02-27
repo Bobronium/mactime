@@ -113,7 +113,7 @@ class TestMactimeGet:
 
     def test_get_all_attributes_json(self, temp_file, run_mactime):
         """Test getting all attributes of a file."""
-        opened = get_last_opened_dates([temp_file])
+        get_last_opened_dates([temp_file])
         result = run_mactime(["get", str(temp_file), "-F", "json"])
         assert result.returncode == 0
 

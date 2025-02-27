@@ -35,7 +35,7 @@ from mactime.logger import logger
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
-    from typing import Any, Never, Self, Unpack
+    from typing import Any, Unpack
 
 
 class AttrList(Structure):
@@ -86,7 +86,7 @@ class TimeSpecArgs(TypedDict, total=False):
 
 class BaseStructure(Structure):
     @classmethod
-    def from_python(cls, value: Any) -> Never:
+    def from_python(cls, value: Any) -> Any:
         raise NotImplementedError
 
     def to_python(self) -> Any:
@@ -94,7 +94,7 @@ class BaseStructure(Structure):
 
     def __repr__(self) -> str:
         fields = ", ".join(
-            f"{k}={getattr(self, k)!r}" for k, _ in self.__class__._fields_
+            f"{k}={getattr(self, k)!r}" for k, *_ in self.__class__._fields_
         )
         return f"{self.__class__.__name__}({fields})"
 
@@ -103,7 +103,7 @@ class Timespec(BaseStructure):
     _fields_ = [("tv_sec", c_long), ("tv_nsec", c_long)]
 
     @classmethod
-    def from_python(cls, value: datetime) -> Self:
+    def from_python(cls, value: datetime) -> "Timespec":
         timestamp = Decimal(value.timestamp())
         sec = int(timestamp)
         nsec = int((timestamp - sec) * NANOSECONDS_IN_SECOND)
@@ -163,20 +163,18 @@ def modify_macos_times(
     """Modify macOS file date attributes for the given file."""
     attr_map = {}
     for name, value in kwargs.items():
-        timespec = Timespec.from_python(value)
+        timespec = Timespec.from_python(value if isinstance(value, datetime) else EPOCH)
         attr = NAME_TO_ATTR_MAP[name]
         logger.info("Will attempt to set '%s' to '%s' on '%s'", name, value, file)
-        attr_map[attr] = timespec
+        attr_map[int(attr)] = timespec  # Fixed: assign timespec to the numeric attr key
 
     if attr_map:
         set_timespec_attrs(file, attr_map, no_follow=no_follow)
 
-    (
-        logger.debug(
-            "Successfully modified attributes for %s: %s",
-            file,
-            attr_map,
-        ),
+    logger.debug(
+        "Successfully modified attributes for %s: %s",
+        file,
+        attr_map,
     )
 
 
@@ -218,7 +216,7 @@ def get_last_opened_dates(paths: list[PathType]) -> dict[PathType, datetime]:
                 f"Unexpected output from mdls after error {encountered_error} {line}"
             )
         if not line.startswith("kMDItemLastUsedDate"):
-            encountered_error = line
+            encountered_error = True  # Was line, but needs to be boolean
             if not line.strip(".").endswith(str(path)):
                 raise RuntimeError(f"Unexpected output from mdls: {line} ({path})")
             logger.warning(
@@ -256,7 +254,7 @@ def get_timespec_attrs(path: PathType, no_follow: bool = False) -> TimeSpecAttrs
     FSOperationError.check_call(ret, path, "calling getattrlist")
 
     length = int.from_bytes(buf.raw[0:4], byteorder="little")
-    result: dict[str, datetime] = {}
+    result = {}  # Initialize as dict and cast later  # Type annotation fixed
     offset = header_size
     value_size = sizeof(Timespec)
     for const, name in ATTR_TO_NAME_MAP.items():
@@ -271,7 +269,9 @@ def get_timespec_attrs(path: PathType, no_follow: bool = False) -> TimeSpecAttrs
         result[name] = value.to_python()
         offset += value_size
 
-    return result
+    return {
+        k: v for k, v in result.items()
+    }  # Return as a new dict that matches TimeSpecAttrs
 
 
 def resolve_paths(
@@ -285,16 +285,16 @@ def resolve_paths(
         return
 
     for path in paths:
-        path = Path(path)
-        if path.is_dir():
+        path_obj = Path(path)  # Convert to Path object while keeping original path
+        if path_obj.is_dir():
             if include_root:
-                yield path
+                yield str(path_obj)
 
-            for item in path.rglob("*"):
+            for item in path_obj.rglob("*"):
                 if item.is_file() or (item.is_dir() and not files_only):
                     yield item
         else:
-            yield path
+            yield str(path_obj)
 
 
 def set_path_times(

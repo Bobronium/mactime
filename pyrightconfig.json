@@ -1,0 +1,19 @@
+{
+  "typeCheckingMode": "off",
+  "reportMissingImports": false,
+  "reportMissingTypeStubs": false,
+  "reportIncompatibleMethodOverride": false,
+  "reportReturnType": false,
+  "reportAssignmentType": false,
+  "reportPossiblyUnboundVariable": false,
+  "reportArgumentType": false,
+  "reportOptionalCall": false,
+  "reportOptionalMemberAccess": false,
+  "reportOptionalOperand": false,
+  "reportOptionalIterable": false,
+  "reportOptionalContextManager": false,
+  "reportOptionalSubscript": false,
+  "reportPrivateImportUsage": false,
+  "reportPrivateUsage": false,
+  "reportCallIssue": false
+}

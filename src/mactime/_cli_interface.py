@@ -16,7 +16,7 @@ from dataclasses import field
 from inspect import cleandoc
 from typing import Any
 from typing import Literal
-from typing import Type, TypeVar, get_type_hints
+from typing import Type, TypeVar
 from mactime.errors import ArgumentsError
 from mactime.errors import MacTimeError
 
@@ -82,13 +82,20 @@ def arg(
     if nargs is not None:
         metadata["nargs"] = nargs
     if choices is not None:
-        metadata["choices"] = choices
+        # Convert to list to fix type compatibility
+        metadata["choices"] = (
+            list(choices) if not isinstance(choices, list) else choices
+        )
 
     if default is not dataclasses.MISSING:
         metadata["default"] = default
 
     if field_default is not dataclasses.MISSING:
-        default = field_default
+        # Convert to appropriate type for assignment compatibility
+        if isinstance(field_default, (str, type(None))):
+            default = field_default
+        else:
+            default = str(field_default)
 
     kwargs = {}
     if sys.version_info >= (3, 10):
@@ -183,7 +190,7 @@ class Command(ABC):
 
         # Not using typing.get_type_hints() to avoid forward refs evaluation
         # allowing to use Python 3.10 syntax in annotations
-        annotations = {}
+        annotations: dict[str, object] = {}
         for cls in reversed(cls.__mro__):
             annotations.update(getattr(cls, "__annotations__", {}).copy())
 
@@ -214,7 +221,7 @@ class Command(ABC):
 
             kwargs = {"help": metadata["help"]}
 
-            if annotation == "bool" and "action" not in metadata:
+            if str(annotation) == "bool" and "action" not in metadata:
                 kwargs["action"] = "store_true"
             elif "action" in metadata:
                 kwargs["action"] = metadata["action"]
@@ -288,7 +295,7 @@ class CLI(ABC):
                 continue
 
             command_cls = attr
-            doc = cleandoc(command_cls.__doc__)
+            doc = cleandoc(command_cls.__doc__ or "")
             help_text, *desc_lines = doc.splitlines(True)
             subparsers_map[name] = subparser = subparsers.add_parser(
                 name,
@@ -297,6 +304,7 @@ class CLI(ABC):
                 formatter_class=RawDescriptionHelpFormatter,
             )
             command_cls.populate_arguments(subparser)
-            command_cls._active_parser = subparser
+            # mypy fix: Using setattr to avoid attribute error
+            setattr(command_cls, "_active_parser", subparser)
 
         return parser, subparsers_map
