@@ -232,7 +232,6 @@ def get_last_opened_dates(paths: list[PathType]) -> dict[PathType, datetime]:
             opened[path] = get_datetime(line.replace("kMDItemLastUsedDate = ", ""))
 
     if len(opened) != len(paths):
-        raise
         opened = dict.fromkeys(paths[: len(opened)], EPOCH)
 
     return opened
