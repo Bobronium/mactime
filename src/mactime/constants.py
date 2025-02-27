@@ -15,7 +15,7 @@ ACCESSED_NAME: Final[str] = "accessed"
 BACKED_UP_NAME: Final[str] = "backed_up"
 OPENED_NAME: Final[str] = "opened"
 
-PathType = str | os.PathLike
+PathType = "str | os.PathLike"
 
 NANOSECONDS_IN_SECOND = Decimal("1e9")
 

@@ -24,6 +24,17 @@ from mactime.errors import MacTimeError
 T = TypeVar("T", bound="Command")
 
 
+def no_default(name: str):
+    # allows field names to have pseudo default fields
+    # which allows to inherit dataclasses with defaults
+    def ensure_not_called():
+        raise TypeError(
+            f"dataclass __init__() missing at least 1 required keyword-only argument: {name!r}"
+        )
+
+    return ensure_not_called
+
+
 class HelpfulParser(ArgumentParser):
     def error(self, message: str):
         print(f"{self.prog}: error: {message}\n", file=sys.stderr)
@@ -54,6 +65,7 @@ def arg(
     *flags: str,
     default: Any = dataclasses.MISSING,
     field_default: Any = dataclasses.MISSING,  # if wasn't populated from argparse.Namespace
+    field_default_factory: Any = dataclasses.MISSING,
     action: str | None = None,
     nargs: str | int | Literal["?", "*", "+"] | None = None,
     choices: Iterable[str] | None = None,
@@ -78,7 +90,21 @@ def arg(
     if field_default is not dataclasses.MISSING:
         default = field_default
 
-    return field(default=default, metadata=metadata, kw_only=True)
+    kwargs = {}
+    if sys.version_info >= (3, 10):
+        kwargs["kw_only"] = True
+        if (
+            field_default_factory is not dataclasses.MISSING
+            and field_default_factory.__name__ == no_default("...").__name__
+        ):
+            field_default_factory = dataclasses.MISSING
+
+    return field(
+        default=default,
+        default_factory=field_default_factory,
+        metadata=metadata,
+        **kwargs,
+    )
 
 
 @dataclass
@@ -154,7 +180,13 @@ class Command(ABC):
         """
 
         fields: dict[str, Field] = cls.__dataclass_fields__.copy()
-        annotations = get_type_hints(cls)
+
+        # Not using typing.get_type_hints() to avoid forward refs evaluation
+        # allowing to use Python 3.10 syntax in annotations
+        annotations = {}
+        for cls in reversed(cls.__mro__):
+            annotations.update(getattr(cls, "__annotations__", {}).copy())
+
         for field_name, annotation in annotations.items():
             try:
                 field_info = fields.pop(field_name)
@@ -182,7 +214,7 @@ class Command(ABC):
 
             kwargs = {"help": metadata["help"]}
 
-            if annotation is bool and "action" not in metadata:
+            if annotation == "bool" and "action" not in metadata:
                 kwargs["action"] = "store_true"
             elif "action" in metadata:
                 kwargs["action"] = metadata["action"]

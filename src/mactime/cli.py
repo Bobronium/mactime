@@ -9,6 +9,7 @@ from typing import cast
 
 from mactime._cli_interface import CLI
 from mactime._cli_interface import Command
+from mactime._cli_interface import no_default
 from mactime.constants import ATTR_NAME_ARG_CHOICES
 from mactime.constants import EPOCH
 from mactime.constants import SHORTHAND_TO_NAME
@@ -86,12 +87,14 @@ class _RecursiveArgs(_GlobalArgs, ABC):
                     "--include-root can only be used with -r/--recursive"
                 )
             if self.files_only:
-                ArgumentsError("--files-only can only be used with -r/--recursive")
+                raise ArgumentsError(
+                    "--files-only can only be used with -r/--recursive"
+                )
         else:
             if (
                 super().no_follow
             ):  # PyCharm only understands this construction for some reason
-                ArgumentsError("--no-follow cannot be used with -r/--recursive")
+                raise ArgumentsError("--no-follow cannot be used with -r/--recursive")
 
 
 @dataclass
@@ -115,6 +118,7 @@ class GetCommand(_RecursiveArgs):
 
     file: list[str] = arg(
         nargs="+",
+        field_default_factory=no_default("file"),
         help="File or directory to inspect",
     )
     name: str | None = arg(
@@ -253,6 +257,7 @@ class SetCommand(_RecursiveArgs):
 
     file: list[str] = arg(
         nargs="+",
+        field_default_factory=no_default("file"),
         help="File or directory to modify",
     )
     to_set: dict[str, datetime] = field(default_factory=dict)
@@ -405,10 +410,12 @@ class MatchCommand(_RecursiveArgs):
 
     source: str = arg(
         help="Source path to copy attributes from",
+        field_default_factory=no_default("source"),
     )
     target: list[str] = arg(
         nargs="+",
         help="Target path(s) to copy attributes to",
+        field_default_factory=no_default("target"),
     )
     attrs: Iterable[str] = field(default=())
     all: bool = arg(
