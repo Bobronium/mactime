@@ -28,10 +28,10 @@ jobs:
         run: uv sync --extra lint
 
       - name: check
-        run: uv run ruff check mactime
+        run: uv run ruff check src tests
 
       - name: format
-        run: uv run ruff format mactime
+        run: uv run ruff format src tests
 
 
   type-check:
@@ -61,7 +61,7 @@ jobs:
         run: uv sync --extra typing
 
       - name: Run MyPy
-        run: uv run mypy mactime
+        run: uv run mypy src
 
   test:
     needs: lint
