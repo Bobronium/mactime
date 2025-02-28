@@ -38,6 +38,27 @@ MacTime supports viewing and modifying the following macOS file date attributes:
 
 ## Installation
 
+### UV
+
+```bash
+uv tool install mactime
+```
+
+### pipx
+
+```bash
+pipx install mactime
+```
+
+### Pure Python
+
+```shell
+bash <(curl -fSL https://raw.githubusercontent.com/Bobronium/mactime/refs/heads/main/install.sh)
+```
+
+
+### pip
+
 ```bash
 pip install mactime
 ```
@@ -45,7 +66,6 @@ pip install mactime
 Or simply clone and install from the repository:
 
 ```bash
-git clone https://github.com/yourusername/mactime.git
 cd mactime
 pip install -e .
 ```
