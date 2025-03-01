@@ -44,30 +44,16 @@ MacTime supports viewing and modifying the following macOS file date attributes:
 uv tool install mactime
 ```
 
-### pipx
-
-```bash
-pipx install mactime
-```
-
 ### Pure Python
 
 ```shell
 bash <(curl -fSL https://raw.githubusercontent.com/Bobronium/mactime/refs/heads/main/install.sh)
 ```
 
-
 ### pip
 
 ```bash
 pip install mactime
-```
-
-Or simply clone and install from the repository:
-
-```bash
-cd mactime
-pip install -e .
 ```
 
 ## Command-Line Usage
