@@ -38,7 +38,7 @@ from mactime.utils import get_yaml_view
 
 DATE_LAST_OPENED_IS_READ_ONlY = (
     "Date Last Opened is not a file attribute. "
-    "It's stored in Spotlight index. There's no discovered a way to modify it."
+    "It's stored in Spotlight index. There's no known way to modify it."
 )
 
 
@@ -306,11 +306,12 @@ class SetCommand(_RecursiveArgs):
     def __post_init__(self):
         super().__post_init__()
 
+        if self.opened is not None:
+            raise ArgumentsError(DATE_LAST_OPENED_IS_READ_ONlY)
+
         if not any((self.to_set, self.from_another_attributes, self.from_opened)):
             self._prepare_args()
 
-        if OPENED_NAME in self.to_set:
-            raise ArgumentsError(DATE_LAST_OPENED_IS_READ_ONlY)
         if CHANGED_NAME in self.to_set or CHANGED_NAME in self.from_another_attributes:
             logger.warning(
                 f"'{CHANGED_NAME}' argument will be set to current time, not '%s'",
