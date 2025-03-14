@@ -26,16 +26,17 @@ The code is a mixture of Claude work and mine.
 
 MacTime supports viewing and modifying the following macOS file date attributes:
 
-| Attribute | Shorthand | macOS API Constant | Unix Equivalent | Finder Column | Description | Writable |
-|-----------|-----------|-------------------|-----------------|---------------|-------------|----------|
-| created   | c         | `ATTR_CMN_CRTIME`   |              | **Date Created**  | File creation timestamp | ✅ |
-| modified  | m         | `ATTR_CMN_MODTIME`  | `st_mtime`        | **Date Modified** | Last content modification time | ✅ |
-| accessed  | a         | `ATTR_CMN_ACCTIME`  | `st_atime`        |           | Last access timestamp | ✅ |
-| added     | d         | `ATTR_CMN_ADDEDTIME`|              | **Date Added**    | When file was added to its current location | ✅ |
-| changed   | g         | `ATTR_CMN_CHGTIME`  | `st_ctime`        |            | Last metadata change | ⚠️ Always set to current time |
-| backed_up | b         | `ATTR_CMN_BKUPTIME` |             |            | Last backup timestamp | ⚠️ Not affected by writings |
-| opened    | o         | N/A               |              | **Date Last Opened** | Last time file was opened | ❌ Read-only (stored in Spotlight index) |
+Here's the modified table with Finder column first, sorted as requested, with Finder column entries in bold and N/A removed:
 
+| **Finder Column** | **Attribute** | **Shorthand** | **macOS API Constant** | **Unix Equivalent** | **Description** | **Writable** |
+|---------------|-----------|-----------|-------------------|-----------------|-------------|----------|
+| **Date Created**  | created   | c         | `ATTR_CMN_CRTIME`   |              | File creation timestamp | ✅ |
+| **Date Modified** | modified  | m         | `ATTR_CMN_MODTIME`  | `st_mtime`   | Last content modification time | ✅ |
+| **Date Last Opened** | opened    | o         |                |              | Last time file was opened | ❌ Read-only (stored in Spotlight index) |
+| **Date Added**    | added     | d         | `ATTR_CMN_ADDEDTIME`|              | When file was added to its current location | ✅ |
+|            | accessed  | a         | `ATTR_CMN_ACCTIME`  | `st_atime`   | Last access timestamp | ✅ |
+|            | changed   | g         | `ATTR_CMN_CHGTIME`  | `st_ctime`   | Last metadata change | ⚠️ Always set to current time |
+|            | backed_up | b         | `ATTR_CMN_BKUPTIME` |              | Last backup timestamp | ⚠️ Not affected by writings (might be a bug) |
 
 ## Installation
 
