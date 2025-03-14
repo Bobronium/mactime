@@ -24,8 +24,6 @@ The code is a mixture of Claude work and mine.
 
 ## Supported Date Attributes
 
-MacTime supports viewing and modifying the following macOS file date attributes:
-
 | **Finder Column** | **Attribute** | **Shorthand** | **macOS API Constant** | **Unix Equivalent** | **Description** | **Writable** |
 |---------------|-----------|-----------|-------------------|-----------------|-------------|----------|
 | **Date Created**  | created   | c         | `ATTR_CMN_CRTIME`   |              | File creation timestamp | ✅ |
