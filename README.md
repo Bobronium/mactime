@@ -26,15 +26,16 @@ The code is a mixture of Claude work and mine.
 
 MacTime supports viewing and modifying the following macOS file date attributes:
 
-| Attribute | Shorthand | Description                | Writable                          |
-|-----------|-----------|----------------------------|-----------------------------------|
-| created   | c         |  Date Created             | ✅                                 |
-| modified  | m         |  Date Modified            | ✅                                 |
-| accessed  | a         | Last accessed date         | ✅                                 |
-| added     | d         |  Date Added               | ✅                                 |
-| changed   | g         | Last attribute change date | ⚠️ Always set to current time     |
-| backed_up | b         | Last Backup Date           | ⚠️ Not affected by writings       |
-| opened    | o         |  Date Last Opened         | ❌ Read-only (stored in Spotlight) |
+| Attribute | Shorthand | macOS API Constant | Unix Equivalent | Finder Column | Description | Writable |
+|-----------|-----------|-------------------|-----------------|---------------|-------------|----------|
+| created   | c         | `ATTR_CMN_CRTIME`   | N/A             | **Date Created**  | File creation timestamp | ✅ |
+| modified  | m         | `ATTR_CMN_MODTIME`  | `st_mtime`        | **Date Modified** | Last content modification time | ✅ |
+| accessed  | a         | `ATTR_CMN_ACCTIME`  | `st_atime`        | N/A           | Last access timestamp | ✅ |
+| added     | d         | `ATTR_CMN_ADDEDTIME`| N/A             | **Date Added**    | When file was added to its current location | ✅ |
+| changed   | g         | `ATTR_CMN_CHGTIME`  | `st_ctime`        | N/A           | Last metadata change | ⚠️ Always set to current time |
+| backed_up | b         | `ATTR_CMN_BKUPTIME` | N/A             | N/A           | Last backup timestamp | ⚠️ Not affected by writings |
+| opened    | o         | N/A               | N/A             | **Date Last Opened** | Last time file was opened | ❌ Read-only (stored in Spotlight index) |
+
 
 ## Installation
 
