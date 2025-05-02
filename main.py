@@ -4,7 +4,7 @@ import sys
 from pathlib import Path
 
 SCRIPT_PATH = Path(__file__)
-if SCRIPT_PATH.is_symlink():
+while SCRIPT_PATH.is_symlink():
     SCRIPT_PATH = SCRIPT_PATH.readlink()
 sys.path.append(str(SCRIPT_PATH.parent / "src"))
 
