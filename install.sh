@@ -83,8 +83,8 @@ create_symlink() {
 setup_symlinks() {
   blue "Creating symlinks..."
   create_symlink "$MAIN_SCRIPT" "$BIN_DIR/mactime"
-  create_symlink "$BIN_DIR/mactime" "$BIN_DIR/whenwhat"
-  create_symlink "$BIN_DIR/whenwhat" "$BIN_DIR/ww"
+  create_symlink "$MAIN_SCRIPT" "$BIN_DIR/whenwhat"
+  create_symlink "$MAIN_SCRIPT" "$BIN_DIR/ww"
 }
 
 # Ensure PATH contains ~/.local/bin
