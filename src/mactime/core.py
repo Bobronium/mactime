@@ -208,7 +208,10 @@ def get_last_opened_dates(paths: list[PathType]) -> dict[PathType, datetime]:
     def get_datetime(value: str) -> datetime:
         if value == null_marker:
             return EPOCH
-        return datetime.fromisoformat(value).replace(tzinfo=None)
+        try:
+            return datetime.fromisoformat(value).replace(tzinfo=None)
+        except ValueError:
+            return datetime.strptime(value, "%Y-%m-%d %H:%M:%S %z")
 
     encountered_error = False
     opened = {}
