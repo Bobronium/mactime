@@ -124,16 +124,16 @@ Copy attributes from one file to another:
 
 ```bash
 # Transfer modification date
-mactime transfer source.txt target.txt -m
+mactime match source.txt target.txt -m
 
 # Transfer all attributes
-mactime transfer source.txt target.txt --all
+mactime match source.txt target.txt --all
 
 # Transfer to multiple targets
-mactime transfer source.txt target1.txt target2.txt -m
+mactime match source.txt target1.txt target2.txt -m
 
 # Transfer recursively to files in a directory
-mactime transfer source.txt ./dir -r --all
+mactime match source.txt ./dir -r --all
 ```
 
 ### Reset Attributes
